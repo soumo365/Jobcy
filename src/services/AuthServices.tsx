@@ -1,12 +1,25 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { auth, db } from "../firebase/config";
+import { doc, setDoc } from "firebase/firestore";
 
 
 
 // register start
 
-export async function register(email: string, password: string) {
-     return await createUserWithEmailAndPassword(auth, email, password);
+export async function register(email: string, password: string,role: string) {
+     const userCredential =  await createUserWithEmailAndPassword(auth, email, password);
+     const user = userCredential.user;
+
+     await setDoc(doc(db, "users" , user.uid),{
+        uid : user.uid,
+        email: user.email,
+        role,
+        createdAt: new Date(),
+        Candidateprofile : {}
+
+     })
+     return user;
+     
 }
 
 // register end

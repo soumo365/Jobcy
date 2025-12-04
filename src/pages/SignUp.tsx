@@ -6,6 +6,7 @@ import { FirebaseError } from "firebase/app";
 function SignUp() {
   const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
+  const [role, setRole] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,9 +22,14 @@ function SignUp() {
       setLoading(false);
       return;
     }
+    if (!role) {
+     setError("Please select your role");
+      setLoading(false);
+    return;
+  }
 
     try {
-      await register(email.trim(), password);
+      await register(email.trim(), password , role);
       navigate("/", { replace: true });
     } catch (err: unknown) {
       if (err instanceof FirebaseError) {
@@ -76,6 +82,19 @@ function SignUp() {
               required
             />
           </div>
+
+       <div className="input-group select-box">
+             <i className="ri-lock-password-line"></i>
+
+          <select value={role} onChange={(e) => setRole(e.target.value)} required>
+              <option value="" disabled>Account Type</option>
+              <option value="employer">Employer</option>
+               <option value="candidate">Candidate</option>
+            </select>
+
+            </div>
+
+
 
           {/* Error */}
           {error && <p className="error">{error}</p>}

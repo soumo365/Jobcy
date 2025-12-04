@@ -27,7 +27,7 @@ function Header() {
                  
                 <ul className="dropdown">
                   <li>
-                    <Link to="/profile">Profile</Link>
+                    <Link to="/candidate-profile">Profile</Link>
                   </li>
                   <li>
                     <Link to="/my-jobs">My Jobs</Link>

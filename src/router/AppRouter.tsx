@@ -5,6 +5,8 @@ import SignIn from "../pages/SignIn";
 import SignUp from "../pages/SignUp";
 import About from "../pages/About";
 import JobPage from "../pages/Job";
+import CandidateProfile from "../pages/CandidateProfile";
+import EditCandidateProfile from "../pages/EditCandidateProfile";
 
 
 
@@ -18,6 +20,19 @@ const  router = createBrowserRouter([
            index : true ,
            Component: Home
         },
+         {
+           path : "/about" ,
+           Component: About
+        },
+         {
+           path : "/candidate-profile" ,
+           Component: CandidateProfile
+        },
+        {
+           path: "candidate-profile/edit-candidate-profile",
+            Component: EditCandidateProfile
+           },
+
          {
            path : "/about" ,
            Component: About

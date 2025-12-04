@@ -850,3 +850,348 @@ p.error {
     }
   }
 }
+
+
+
+.select-box{
+  position: relative;
+  select{
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    border: 0px;
+    padding-left: 2.9rem;
+        color: #64748b;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+   
+    &:focus{
+      border:0px;
+    }
+    &:focus-within,&:focus-visible{
+       border:0px;
+       outline: none;
+    }
+  }
+}
+
+
+
+.candidate-profile {
+  padding: 60px 0;
+
+  /* HEADER */
+  .profile-header {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+
+    .profile-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+      .avatar img {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+
+      h2 {
+        font-size: 28px;
+        margin-bottom: 4px;
+      }
+
+      .role {
+        font-size: 16px;
+        opacity: .7;
+      }
+
+      .location {
+        font-size: 14px;
+        opacity: .6;
+      }
+    }
+
+    .edit-btn {
+      padding: 10px 20px;
+      background: #4a60ff;
+      color: #fff;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: .2s;
+
+      &:hover {
+        background: #3348e0;
+      }
+    }
+  }
+
+  /* PROFILE SECTIONS */
+  .profile-section {
+    background: #fff;
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+
+    h3 {
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+  }
+
+  /* INFO GRID */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+
+    .info-item {
+      .label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 5px;
+      }
+      p {
+        opacity: .7;
+      }
+    }
+  }
+
+  /* SKILLS */
+  .skills-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    span {
+      background: #f1f3ff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #4a60ff;
+      font-weight: 500;
+    }
+  }
+
+  /* EXPERIENCE */
+  .exp-card {
+    margin-bottom: 25px;
+
+    h4 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .duration {
+      font-size: 14px;
+      opacity: .6;
+      margin-bottom: 10px;
+    }
+
+    .desc {
+      opacity: .8;
+      line-height: 1.6;
+    }
+  }
+
+  /* RESUME */
+  .resume-section {
+    .resume-box {
+      background: #f9f9ff;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .download-btn {
+        padding: 10px 18px;
+        background: #4a60ff;
+        color: #fff;
+        border-radius: 8px;
+        border: none;
+
+        &:hover {
+          background: #3348e0;
+        }
+      }
+    }
+  }
+}
+
+
+
+.editProfilePage {
+  padding: 80px 0;
+  background: #f7f8fc;
+
+  .profileHeader {
+    text-align: center;
+    margin-bottom: 40px;
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    p {
+      color: #555;
+      margin-top: 5px;
+    }
+  }
+
+  .editProfileForm {
+    background: #fff;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+
+    .formBlock {
+      margin-bottom: 40px;
+
+      .blockTitle {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #222;
+      }
+
+      .formGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+
+        .fullWidth {
+          grid-column: span 2;
+        }
+
+        .inputField {
+          display: flex;
+          flex-direction: column;
+
+          label {
+            font-weight: 500;
+            margin-bottom: 6px;
+          }
+
+          input,
+          textarea {
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+
+            &:focus {
+              border-color: #007bff;
+              box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+              outline: none;
+            }
+          }
+
+          textarea {
+            height: 120px;
+            resize: none;
+          }
+        }
+      }
+
+      
+    }
+.addMoreBtn {
+        margin-top: 0px;
+        background: none;
+        border: 1px dashed #007bff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 30px;
+      }
+.removeExpBtn {
+        margin-top: 25px;
+        background: none;
+        border: 1px dashed #ff1f1f;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        color: #fd2121;
+        font-weight: 600;
+        margin-bottom: 0;
+      }
+    /* Skills */
+    .chipInput input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .chipList {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      .chip {
+        background: #eaf3ff;
+        padding: 6px 14px;
+        border-radius: 50px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+
+        .close {
+          margin-left: 10px;
+          cursor: pointer;
+          font-weight: bold;
+        }
+      }
+    }
+
+    /* Upload */
+    .uploadBox {
+      border: 2px dashed #ccc;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+
+      input {
+        display: none;
+      }
+
+      .uploadLabel {
+        cursor: pointer;
+        font-weight: 600;
+        color: #333;
+        display: block;
+      }
+    }
+
+    .submitBtn {
+      width: 100%;
+      padding: 14px;
+      background: #007bff;
+      color: #fff;
+      border-radius: 10px;
+      border: none;
+      font-size: 18px;
+      margin-top: 20px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+  }
+}
