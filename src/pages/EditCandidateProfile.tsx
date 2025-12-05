@@ -1,8 +1,26 @@
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { useState } from "react"
-import { uploadFile } from "../services/FileUploadServices";
+import { db } from "../firebase/config";
+import { useAuth } from "../context/AuthContext";
+import { uploadFileToCloudinary } from "../services/FileUploadServices";
+import { useNavigate } from "react-router-dom";
+
+
+
 
 
 function EditCandidateProfile() {
+  const {user,userData, setUserData,loading} =  useAuth();
+  if (loading) return <p>Loading...</p>;
+if (!userData) return <p>No user data found</p>;
+
+const userDetails = userData.profile || {};
+const navigate = useNavigate();
+
+
+  const [selectedPicFile, setSelectedPicFile] = useState<File | null>(null);
+const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(null);
+
   interface Experience {
   jobTitle: string;
   company: string;
@@ -80,39 +98,32 @@ const removeSkill = (index: number) => {
 };
 
 
+
+
 const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
-
-  // show instant preview before upload
   const previewURL = URL.createObjectURL(file);
-  
+   setSelectedPicFile(file);
   setCandidateProf(prev => ({
     ...prev,
     profilePic: previewURL,
   }));
-   
-  // upload to Firebase
-  const uploadedURL = await uploadFile(file, "profilePics");
-  console.log(uploadedURL);
-  // update state with Firebase URL
-  setCandidateProf(prev => ({
-    ...prev,
-    profilePic: uploadedURL,
-  }));
+  console.log(previewURL);
 };
+
+
 
 
 const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
-  const url = await uploadFile(file, "resumes");  
-  console.log("FILE URL:", url);  // <-- Check here
-  console.log(url);
+  const previewURL = URL.createObjectURL(file);
+   setSelectedResumeFile(file);
   setCandidateProf(prev => ({
     ...prev,
-    resume: url,
+    resume: previewURL,
   }));
 };
 
@@ -142,6 +153,51 @@ const handleExperienceChange = (
   });
 };
 
+console.log(userData);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!user) return alert("User not logged in!");
+
+  let profilePicUrl = candidateProf.profilePic;
+  let resumeUrl = candidateProf.resume;
+
+  // Upload new profile picture if selected
+  if (selectedPicFile) {
+    profilePicUrl = await uploadFileToCloudinary(selectedPicFile);
+  }
+
+  // Upload new resume if selected
+  if (selectedResumeFile) {
+    resumeUrl = await uploadFileToCloudinary(selectedResumeFile);
+  }
+
+  // Prepare final profile object
+  const updatedProfile = {
+    ...candidateProf,
+    profilePic: profilePicUrl,
+    resume: resumeUrl,
+  };
+
+  // SAVE TO FIRESTORE
+  await updateDoc(doc(db, "users", user.uid), {
+    profile: updatedProfile,
+    updatedAt: new Date(),
+  });
+
+  // UPDATE CONTEXT (VERY IMPORTANT)
+  setUserData((prev: any) => ({
+    ...prev,
+    profile: updatedProfile,
+    updatedAt: new Date(),
+  }));
+
+  alert("Profile updated successfully!");
+  navigate("/candidate-profile"); 
+};
+
+
 
 
   return (
@@ -155,14 +211,19 @@ const handleExperienceChange = (
       <p>Update your personal information and resume details</p>
     </div>
 
-    <form className="editProfileForm">
+    <form className="editProfileForm" onSubmit={handleSubmit}>
    <div className="profilePicSection">
   <div className="picWrapper">
-    <img 
-      src={candidateProf.profilePic || "https://via.placeholder.com/150"} 
-     
-      className="profilePic"
-    />
+   <img
+  src={
+    userDetails?.profilePic ||
+    candidateProf.profilePic ||
+    "https://media.istockphoto.com/id/1223671392/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=s0aTdmT5aU6b8ot7VKm11DeID6NctRCpB755rA1BIP0="
+  }
+  className="profilePic"
+/>
+
+ 
 
     <label className="uploadBtn">
       <i className="ri-camera-line"></i>
@@ -179,13 +240,13 @@ const handleExperienceChange = (
         <div className="formGrid">
           <div className="inputField">
             <label>Full Name</label>
-            <input type="text" placeholder="Enter your full name" onChange={(e)=>setCandidateProf(
+            <input type="text" placeholder="Enter your full name"  onChange={(e)=>setCandidateProf(
               {
                 ...candidateProf ,
               fullName: e.target.value,
               }
 
-            )} value={candidateProf.fullName}/>
+            )} value={candidateProf.fullName || userDetails.fullName || ""}/>
           </div>
 
           <div className="inputField">
@@ -196,7 +257,7 @@ const handleExperienceChange = (
               email: e.target.value,
               }
 
-            )} value={candidateProf.email}/>
+            )} value={candidateProf.email || userDetails.email || ""}/>
           </div>
 
           <div className="inputField">
@@ -207,7 +268,7 @@ const handleExperienceChange = (
               phone: e.target.value,
               }
 
-            )} value={candidateProf.phone}/>
+            )} value={candidateProf.phone || userDetails.phone || ""}/>
           </div>
 
           <div className="inputField">
@@ -218,7 +279,7 @@ const handleExperienceChange = (
               location: e.target.value,
               }
 
-            )} value={candidateProf.location}/>
+            )} value={candidateProf.location || userDetails.location || ""}/>
           </div>
 
           <div className="inputField fullWidth">
@@ -229,7 +290,7 @@ const handleExperienceChange = (
               bio: e.target.value,
               }
 
-            )} value={candidateProf.bio}></textarea>
+            )} value={candidateProf.bio || userDetails.bio || ""}></textarea>
           </div>
         </div>
       </div>

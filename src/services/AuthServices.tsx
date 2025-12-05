@@ -5,22 +5,21 @@ import { doc, setDoc } from "firebase/firestore";
 
 
 // register start
+export async function register(email: string, password: string, role: string) {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
 
-export async function register(email: string, password: string,role: string) {
-     const userCredential =  await createUserWithEmailAndPassword(auth, email, password);
-     const user = userCredential.user;
+  await setDoc(doc(db, "users", user.uid), {
+    uid: user.uid,
+    email: user.email,
+    role,
+    profile: {},          
+    createdAt: new Date(),
+  });
 
-     await setDoc(doc(db, "users" , user.uid),{
-        uid : user.uid,
-        email: user.email,
-        role,
-        createdAt: new Date(),
-        Candidateprofile : {}
-
-     })
-     return user;
-     
+  return user;
 }
+
 
 // register end
 

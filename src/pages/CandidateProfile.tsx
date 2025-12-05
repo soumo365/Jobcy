@@ -1,7 +1,16 @@
-import { Link, Outlet } from "react-router-dom"
+import { Link } from "react-router-dom"
+import { useAuth } from "../context/AuthContext";
 
 
 function CandidateProfile() {
+const { userData, loading } = useAuth();
+
+if (loading) return <p>Loading...</p>;
+if (!userData) return <p>No user data found</p>;
+
+const userDetails = userData.profile || {};
+
+
   return (
     <>
   
@@ -11,13 +20,13 @@ function CandidateProfile() {
   <div className="profile-header">
     <div className="profile-left">
       <div className="avatar">
-        <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e" alt="Profile" />
+        <img src={userDetails.profilePic} />
       </div>
 
       <div>
-        <h2>Priya Sharma</h2>
-        <p className="role">Frontend Developer</p>
-        <p className="location">Bangalore • India</p>
+        <h2>{userDetails.fullName}</h2>
+        <p className="role">{userDetails.role}</p>
+        <p className="location">{userDetails.location}</p>
       </div>
     </div>
 
@@ -33,12 +42,12 @@ function CandidateProfile() {
     <div className="info-grid">
       <div className="info-item">
         <span className="label">Email:</span>
-        <p>priya.dev@gmail.com</p>
+        <p>{userDetails.email}</p>
       </div>
 
       <div className="info-item">
         <span className="label">Phone:</span>
-        <p>+91 9876543210</p>
+        <p>{userDetails.phone}</p>
       </div>
 
       <div className="info-item">
@@ -58,13 +67,10 @@ function CandidateProfile() {
     <h3>Skills</h3>
 
     <div className="skills-box">
-      <span>React</span>
-      <span>JavaScript</span>
-      <span>TypeScript</span>
-      <span>UI/UX</span>
-      <span>HTML & CSS</span>
-      <span>Git</span>
-      <span>Figma</span>
+      {userDetails.skills.map((skill: string, index: number) => {
+  return <span key={index}>{skill}</span>;
+})}
+
     </div>
   </div>
 
@@ -72,17 +78,21 @@ function CandidateProfile() {
   <div className="profile-section">
     <h3>Experience</h3>
 
-    <div className="exp-card">
-      <h4>Frontend Developer — Google</h4>
-      <p className="duration">2022 - Present</p>
-      <p className="desc">Building UI features with React, TypeScript, and Webpack. Created internal dashboards and optimized UI performance.</p>
-    </div>
 
-    <div className="exp-card">
-      <h4>UI Developer — Infosys</h4>
-      <p className="duration">2020 - 2022</p>
-      <p className="desc">Worked on website redesigns, UI prototyping, and development using HTML, CSS, and JavaScript.</p>
-    </div>
+    {
+  userDetails.experience.map((exp: any, index: number) => {
+    return (
+      <div className="exp-card" key={index}>
+        <h4>{exp.jobTitle}</h4>
+        <p className="duration">{exp.startYear} - {exp.endYear}</p>
+        <p className="desc">{exp.description}</p>
+      </div>
+    );
+  })
+}
+
+
+   
   </div>
 
   {/* RESUME SECTION */}
@@ -90,8 +100,16 @@ function CandidateProfile() {
     <h3>Resume</h3>
 
     <div className="resume-box">
-      <p>Priya-Sharma-Resume.pdf</p>
-      <button className="download-btn">Download</button>
+      <p>{userDetails.resume.split("/").pop()}</p>
+      <a 
+  href={userDetails.resume} 
+  download 
+  target="_blank" 
+  className="download-btn"
+  rel="noopener noreferrer"
+>
+  Download
+</a>
     </div>
   </div>
 
