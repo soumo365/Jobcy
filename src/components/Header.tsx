@@ -3,8 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import { logout } from "../services/AuthServices";
 
 function Header() {
-  const { user } = useAuth();
-
+  const { user, userData ,loading } = useAuth();
+  //  loading ? "loading " : console.log(userData.role);
   return (
     <>
       <header className="navbar">
@@ -18,8 +18,11 @@ function Header() {
             <Link to="/jobs">Jobs</Link>
             <Link to="/companies">Companies</Link>
             <Link to="/about">About</Link>
-
-            {user ? (
+             
+            {
+            
+            loading ? <p>loading....</p> : 
+            user && userData ? userData.role == "candidate" ? (
               <div className="butn">
                 <span>
                  <i className="ri-user-line"></i>
@@ -37,7 +40,26 @@ function Header() {
                   </li>
                 </ul>
               </div>
-            ) : (
+            ): ( <div className="butn">
+                <span>
+                 <i className="ri-user-line"></i>
+                </span>
+                 
+                <ul className="dropdown">
+                  <li>
+                    <Link to="/employer-profile">Profile</Link>
+                  </li>
+                  <li>
+                    <Link to="/my-jobs">My Jobs</Link>
+                  </li>
+                  <li>
+                    <Link to="/post-job">Post a Job</Link>
+                  </li>
+                  <li>
+                    <Link to="" onClick={()=>logout()} >Logout</Link>
+                  </li>
+                </ul>
+              </div>) : (
               <Link to="/signin" className="btn primary-btn">
                 Sign In
               </Link>

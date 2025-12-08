@@ -130,6 +130,7 @@ const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
 
 
+
 // function handleExperienceChange(index, field, value) {
 //   setCandidateProf(prev => {
 //     const updatedExp = [...prev.experience]; // copy all jobs
