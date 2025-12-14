@@ -1,8 +1,15 @@
 import { useState } from "react";
+import { uploadFileToCloudinary } from "../../services/FileUploadServices";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase/config";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 
 function EditEmployerProfile() {
-
+  
+  const {user,userData,setUserData,loading} = useAuth();
+  const navigate = useNavigate();
   interface  employerProfileDataType{
       companyName : string;
       tagline : string;
@@ -12,7 +19,6 @@ function EditEmployerProfile() {
       website:string;
       about: string;
       benefits : string[];
-      logo : string;
       profilePic : string,
 
   }
@@ -26,7 +32,6 @@ function EditEmployerProfile() {
       website:"",
       about: "",
       benefits : [],
-      logo : "",
       profilePic :"",
   }) 
 
@@ -66,6 +71,48 @@ const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) =>
   console.log(previewURL);
 };
 
+
+
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!user) return alert("User not logged in!");
+
+  let profilePicUrl =  employerProfileData.profilePic;
+
+  // Upload new profile picture if selected
+  if (selectedPicFile) {
+    profilePicUrl = await uploadFileToCloudinary(selectedPicFile);
+  }
+
+  // Prepare final profile object
+  const updatedProfile = {
+    ...employerProfileData,
+    profilePic: profilePicUrl,
+  };
+
+  // SAVE TO FIRESTORE
+  await updateDoc(doc(db, "users", user.uid), {
+    profile: updatedProfile,
+    updatedAt: new Date(),
+  });
+
+  // UPDATE CONTEXT (VERY IMPORTANT)
+  setUserData((prev: any) => ({
+    ...prev,
+    profile: updatedProfile,
+    updatedAt: new Date(),
+  }));
+
+  alert("Profile updated successfully!");
+  navigate("/employer-profile"); 
+};
+
+
+
+
+
   return (
      <>
 <section className="employerEditProfile">
@@ -75,8 +122,28 @@ const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) =>
       <p>Keep your company information up to date</p>
     </div>
 
-    <form className="editForm">
+    <form className="editForm" onSubmit={handleSubmit}> 
+     <div className="profilePicSection">
+  <div className="picWrapper">
+   <img
+  src={
+    employerProfileData.profilePic ||
+    userData.profile?.profilePic ||
+    "https://media.istockphoto.com/id/1223671392/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=s0aTdmT5aU6b8ot7VKm11DeID6NctRCpB755rA1BIP0="
+  }
+  className="profilePic"
+/>
 
+ 
+
+    <label className="uploadBtn">
+      <i className="ri-camera-line"></i>
+      <input type="file" accept="image/*" onChange={handleProfilePicUpload} />
+    </label>
+  </div>
+
+  <p className="hintText">Click the camera icon to upload your profile picture</p>
+</div>
 
       <div className="formCard">
         <h2>Company Information</h2>
@@ -173,16 +240,7 @@ const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) =>
       </div>
 
    
-      <div className="formCard">
-        <h2>Company Logo</h2>
-
-        <div className="uploadBox">
-          <input type="file" id="logoUpload" onChange={handleProfilePicUpload}/>
-          <label >
-            Click to upload logo (PNG / JPG)
-          </label>
-        </div>
-      </div>
+   
 
   
       <button className="saveBtn">Save Changes</button>

@@ -1521,9 +1521,14 @@ p.error {
     padding: 30px;
     text-align: center;
     border-radius: 12px;
-
-    input {
-      display: none;
+    position: relative;
+    .inputBox {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      opacity: 0;
     }
 
     label {

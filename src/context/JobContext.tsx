@@ -1,11 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/config"; // Adjust path if needed
+import { db } from "../firebase/config";
+import { useAuth } from "./AuthContext";
 
 // Job interface
 export interface Job {
   id: string;
+  postedBy: string;
   title: string;
   category: string;
   companyName: string;
@@ -29,41 +31,41 @@ export interface Job {
 // Context type
 interface JobContextType {
   jobs: Job[];
+  myJobs: Job[];
   loading: boolean;
   refetchJobs: () => void;
 }
 
-// Create context
 const JobContext = createContext<JobContextType>({
   jobs: [],
+  myJobs: [],
   loading: true,
   refetchJobs: () => {},
 });
 
 export const useJobs = () => useContext(JobContext);
 
-// Provider component
 export const JobProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const myJobs = jobs.filter((job) => job.postedBy === user?.uid);
+
   const fetchJobs = async () => {
-    console.log("Fetching jobs from Firestore...");
     setLoading(true);
     try {
-      const jobsCollection = collection(db, "jobs"); // Make sure your collection name is correct
-      const snapshot = await getDocs(jobsCollection);
-       console.log(snapshot);
-      const jobsList: Job[] = [];
-     
-      snapshot.forEach((doc) => jobsList.push(doc.data() as Job));
+      const snapshot = await getDocs(collection(db, "jobs"));
+      const jobsList: Job[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Job, "id">),
+      }));
 
-      console.log("Jobs fetched:", jobsList.length);
       setJobs(jobsList);
     } catch (err) {
       console.error("Error fetching jobs:", err);
     } finally {
-      setLoading(false); // Ensure loading stops even if error occurs
+      setLoading(false);
     }
   };
 
@@ -72,7 +74,7 @@ export const JobProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <JobContext.Provider value={{ jobs, loading, refetchJobs: fetchJobs }}>
+    <JobContext.Provider value={{ jobs, myJobs, loading, refetchJobs: fetchJobs }}>
       {children}
     </JobContext.Provider>
   );
