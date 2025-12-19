@@ -2,8 +2,9 @@ import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { useState } from "react"
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { uploadFileToCloudinary } from "../services/FileUploadServices";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../supabase/config";
+import { uploadToSupabase } from "../services/FileUploadServices";
 
 
 
@@ -20,6 +21,7 @@ const navigate = useNavigate();
 
   const [selectedPicFile, setSelectedPicFile] = useState<File | null>(null);
 const [selectedResumeFile, setSelectedResumeFile] = useState<File | null>(null);
+
 
   interface Experience {
   jobTitle: string;
@@ -100,34 +102,6 @@ const removeSkill = (index: number) => {
 
 
 
-const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const previewURL = URL.createObjectURL(file);
-   setSelectedPicFile(file);
-  setCandidateProf(prev => ({
-    ...prev,
-    profilePic: previewURL,
-  }));
-  console.log(previewURL);
-};
-
-
-
-
-const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  const previewURL = URL.createObjectURL(file);
-   setSelectedResumeFile(file);
-  setCandidateProf(prev => ({
-    ...prev,
-    resume: previewURL,
-  }));
-};
-
-
 
 
 
@@ -156,47 +130,82 @@ const handleExperienceChange = (
 
 console.log(userData);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
 
-  if (!user) return alert("User not logged in!");
 
-  let profilePicUrl = candidateProf.profilePic;
-  let resumeUrl = candidateProf.resume;
+  /* ================= FILE SELECT (LOCAL PREVIEW ONLY) ================= */
 
-  // Upload new profile picture if selected
-  if (selectedPicFile) {
-    profilePicUrl = await uploadFileToCloudinary(selectedPicFile);
-  }
+  const handleProfilePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // Upload new resume if selected
-  if (selectedResumeFile) {
-    resumeUrl = await uploadFileToCloudinary(selectedResumeFile);
-  }
-
-  // Prepare final profile object
-  const updatedProfile = {
-    ...candidateProf,
-    profilePic: profilePicUrl,
-    resume: resumeUrl,
+    setSelectedPicFile(file);
+    setCandidateProf(prev => ({
+      ...prev,
+      profilePic: URL.createObjectURL(file), // blob preview
+    }));
   };
 
-  // SAVE TO FIRESTORE
-  await updateDoc(doc(db, "users", user.uid), {
-    profile: updatedProfile,
-    updatedAt: new Date(),
-  });
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  // UPDATE CONTEXT (VERY IMPORTANT)
-  setUserData((prev: any) => ({
-    ...prev,
-    profile: updatedProfile,
-    updatedAt: new Date(),
-  }));
+    setSelectedResumeFile(file);
+    setCandidateProf(prev => ({
+      ...prev,
+      resume: URL.createObjectURL(file), // blob preview
+    }));
+  };
 
-  alert("Profile updated successfully!");
-  navigate("/candidate-profile"); 
-};
+  /* ================= SUPABASE UPLOAD ================= */
+
+
+
+
+
+
+  /* ================= SUBMIT ================= */
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return alert("User not logged in!");
+
+    let profilePicUrl = userDetails.profilePic || "";
+    let resumeUrl = userDetails.resume || "";
+
+    // upload ONLY on submit
+ if (selectedPicFile) {
+  profilePicUrl = await uploadToSupabase(selectedPicFile, "profile-pic");
+}
+
+if (selectedResumeFile) {
+  resumeUrl = await uploadToSupabase(selectedResumeFile, "resume");
+  console.log(resumeUrl);
+}
+    const updatedProfile = {
+      ...candidateProf,
+      profilePic: profilePicUrl,
+      resume: resumeUrl,
+    };
+
+    await updateDoc(doc(db, "users", user.uid), {
+      profile: updatedProfile,
+      updatedAt: new Date(),
+    });
+
+    setUserData((prev: any) => ({
+      ...prev,
+      profile: updatedProfile,
+    }));
+
+    alert("Profile updated successfully!");
+    navigate("/candidate-profile");
+  };
+
+
+
+
+
+
 
 
 
@@ -217,8 +226,8 @@ const handleSubmit = async (e: React.FormEvent) => {
   <div className="picWrapper">
    <img
   src={
-    userDetails?.profilePic ||
     candidateProf.profilePic ||
+    userDetails?.profilePic ||
     "https://media.istockphoto.com/id/1223671392/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=612x612&w=0&k=20&c=s0aTdmT5aU6b8ot7VKm11DeID6NctRCpB755rA1BIP0="
   }
   className="profilePic"

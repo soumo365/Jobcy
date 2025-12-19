@@ -10,6 +10,7 @@ import EditCandidateProfile from "../pages/EditCandidateProfile";
 import EmployerProfile from "../pages/employerPages/EmployerProfile";
 import EditEmployerProfile from "../pages/employerPages/EditEmployerProfile";
 import PostJob from "../pages/employerPages/PostJob";
+import JobDetails from "../pages/JobDetails";
 
 
 
@@ -55,7 +56,11 @@ const  router = createBrowserRouter([
          {
            path : "/jobs" ,
            Component: JobPage
-        }
+        },
+         {
+           path: "/jobs/:jobId",
+            Component: JobDetails
+           },
         
     ]
 },

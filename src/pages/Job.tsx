@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/config"; // adjust path if needed
 
@@ -123,6 +124,7 @@ const JobPage = () => {
         {filteredJobs.length > 0 ? (
           filteredJobs.map((job) => (
             <div className="job-card" key={job.id}>
+              <Link to={`/jobs/${job.id}`}></Link>
               <div className="top">
                 <h3>{job.title}</h3>
                 <span

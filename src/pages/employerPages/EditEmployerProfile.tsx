@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { uploadFileToCloudinary } from "../../services/FileUploadServices";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { uploadToSupabase } from "../../services/FileUploadServices";
 
 
 function EditEmployerProfile() {
@@ -58,20 +58,17 @@ const removeBenefit = (index: number) => {
 const [selectedPicFile, setSelectedPicFile] = useState<File | null>();
 
 
-const handleProfilePicUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  console.log(file);
-  if (!file) return;
-  const previewURL = URL.createObjectURL(file);
-   setSelectedPicFile(file);
-  setEmployerProfileData(prev => ({
-    ...prev,
-    profilePic: previewURL,
-  }));
-  console.log(previewURL);
-};
 
+const handleProfilePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
+    setSelectedPicFile(file);
+    setEmployerProfileData(prev => ({
+      ...prev,
+      profilePic: URL.createObjectURL(file), // blob preview
+    }));
+  };
 
 
 const handleSubmit = async (e: React.FormEvent) => {
@@ -79,12 +76,12 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   if (!user) return alert("User not logged in!");
 
-  let profilePicUrl =  employerProfileData.profilePic;
+  let profilePicUrl =  employerProfileData.profilePic || "";
 
   // Upload new profile picture if selected
-  if (selectedPicFile) {
-    profilePicUrl = await uploadFileToCloudinary(selectedPicFile);
-  }
+ if (selectedPicFile) {
+  profilePicUrl = await uploadToSupabase(selectedPicFile, "profile-pic");
+}
 
   // Prepare final profile object
   const updatedProfile = {
