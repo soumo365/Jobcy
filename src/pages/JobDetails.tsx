@@ -1,6 +1,9 @@
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useJobs } from "../context/JobContext";
 import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase/config";
+import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 function JobDetails() {
   const { jobId } = useParams();
@@ -12,6 +15,27 @@ function JobDetails() {
   const job = jobs.find(j => j.id === jobId);
 
   if (!job) return <p>Job not found</p>;
+       
+ const getEmployerProfilePic = async (uid:any) => {
+  const snap = await getDoc(doc(db, "users", uid))
+  if (snap.exists()) {
+    return snap.data().profile.profilePic;
+  }
+  return null
+}
+const [employerProfilePic, setEmployerProfilePic] = useState<string | null>(null)
+useEffect(() => {
+  if (!job?.postedBy) return
+
+  const fetchProfilePic = async () => {
+    const pic = await getEmployerProfilePic(job.postedBy)
+    setEmployerProfilePic(pic)
+  }
+
+  fetchProfilePic()
+}, [job])
+
+
 
   return (
     <section className="jobDetails">
@@ -21,7 +45,7 @@ function JobDetails() {
         <div className="jobHeader">
           <div className="companyInfo">
             <img
-              src={userData.profile.profilePic || "https://via.placeholder.com/80"}
+              src={ employerProfilePic || "https://via.placeholder.com/80"}
               alt={job.companyName}
             />
             <div>
@@ -38,7 +62,7 @@ function JobDetails() {
             </div>
           </div>
 
-          <button className="applyBtn">Apply Now</button>
+          <Link to={`/jobs/${job.id}/apply`} className="applyBtn">Apply Now</Link>
         </div>
 
         <div className="jobLayout">

@@ -11,6 +11,9 @@ import EmployerProfile from "../pages/employerPages/EmployerProfile";
 import EditEmployerProfile from "../pages/employerPages/EditEmployerProfile";
 import PostJob from "../pages/employerPages/PostJob";
 import JobDetails from "../pages/JobDetails";
+import ApplyJob from "../pages/Apply";
+import ApplicationSuccess from "../pages/ApplicationSucess";
+import MyJobs from "../pages/myJobs";
 
 
 
@@ -61,6 +64,19 @@ const  router = createBrowserRouter([
            path: "/jobs/:jobId",
             Component: JobDetails
            },
+              {
+           path: "/jobs/:jobId/apply",
+            Component: ApplyJob
+           },
+             {
+           path: "/jobs/:jobId/apply/success",
+            Component: ApplicationSuccess
+           },
+            {
+           path: "/my-jobs",
+            Component: MyJobs
+           },
+        
         
     ]
 },
