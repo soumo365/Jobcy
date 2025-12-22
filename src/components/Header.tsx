@@ -50,7 +50,7 @@ function Header() {
                     <Link to="/employer-profile">Profile</Link>
                   </li>
                   <li>
-                    <Link to="/my-jobs">My Jobs</Link>
+                    <Link to="/employer-my-jobs">My Jobs</Link>
                   </li>
                   <li>
                     <Link to="/post-job">Post a Job</Link>

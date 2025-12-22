@@ -14,6 +14,11 @@ import JobDetails from "../pages/JobDetails";
 import ApplyJob from "../pages/Apply";
 import ApplicationSuccess from "../pages/ApplicationSucess";
 import MyJobs from "../pages/myJobs";
+import EmployerMyJobs from "../pages/employerPages/EmployerMyJobs";
+import EmployerJobApplicants from "../pages/employerPages/EmployerJobApplicants";
+import ApplicantDetails from "../pages/employerPages/Applicants-details";
+import Companies from "../pages/Companies";
+import CompanyDetails from "../pages/CompanyDetails";
 
 
 
@@ -48,6 +53,20 @@ const  router = createBrowserRouter([
             Component: EditEmployerProfile
            },
         {
+           path: "employer-my-jobs",
+            Component: EmployerMyJobs
+           },
+      {
+  path: "employer-my-jobs/employer-job-applicants/:jobId",
+  Component: EmployerJobApplicants
+}
+,
+{
+  path: "employer-my-jobs/employer-job-applicants/:jobId/:applicantUid",
+  Component: ApplicantDetails
+},
+
+        {
            path: "/post-job",
             Component: PostJob
            },
@@ -56,6 +75,15 @@ const  router = createBrowserRouter([
            path : "/about" ,
            Component: About
         },
+         {
+           path : "/companies" ,
+           Component: Companies
+        },
+        {
+  path: "/companies/:companyId",
+  Component: CompanyDetails
+},
+
          {
            path : "/jobs" ,
            Component: JobPage
@@ -76,6 +104,7 @@ const  router = createBrowserRouter([
            path: "/my-jobs",
             Component: MyJobs
            },
+         
         
         
     ]

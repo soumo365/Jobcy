@@ -77,19 +77,27 @@ function MyJobs() {
           const jobSnap = await getDoc(
             doc(db, "jobs", appData.jobId)
           )
+
           const jobData = jobSnap.exists()
             ? (jobSnap.data() as Job)
             : null
 
           // Employer (users)
           let employerData: UserProfile | null = null
+
           if (jobData?.postedBy) {
             const userSnap = await getDoc(
               doc(db, "users", jobData.postedBy)
             )
-            employerData = userSnap.exists()
-              ? (userSnap.data() as UserProfile)
-              : null
+
+            if (userSnap.exists()) {
+              const user = userSnap.data()
+
+              employerData = {
+                profilePic: user?.profile?.profilePic || "",
+                fullName: user?.profile?.fullName || "",
+              }
+            }
           }
 
           return {
@@ -107,10 +115,16 @@ function MyJobs() {
     fetchAppliedJobs()
   }, [userData])
 
+  /* ================= FILTER ================= */
+
   const filtered =
     filter === "all"
       ? applications
-      : applications.filter(a => a.status === filter)
+      : applications.filter(
+          app => (app.status || "in-review") === filter
+        )
+
+  /* ================= UI ================= */
 
   if (loading) return <p>Loading applied jobs...</p>
 
@@ -118,6 +132,16 @@ function MyJobs() {
     <section className="my-jobs-page">
       <div className="container">
         <h1>My Jobs</h1>
+
+        {/* Example filter UI (optional) */}
+        {/* 
+        <div className="filters">
+          <button onClick={() => setFilter("all")}>All</button>
+          <button onClick={() => setFilter("in-review")}>In Review</button>
+          <button onClick={() => setFilter("shortlisted")}>Shortlisted</button>
+          <button onClick={() => setFilter("rejected")}>Rejected</button>
+        </div>
+        */}
 
         <div className="applied-jobs">
           {filtered.length === 0 && <p>No jobs found.</p>}
@@ -135,6 +159,7 @@ function MyJobs() {
                     }
                     alt="Company"
                   />
+
                   <div>
                     <h3>{app.job?.title}</h3>
                     <p>
@@ -151,7 +176,9 @@ function MyJobs() {
 
                   <span>
                     Applied on{" "}
-                    {app.createdAt?.toDate?.().toLocaleDateString()}
+                    {app.createdAt
+                      ?.toDate?.()
+                      .toLocaleDateString()}
                   </span>
 
                   <Link to={`/jobs/${app.jobId}`}>

@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/config"; // adjust path if needed
+import { db } from "../firebase/config";
 
 interface Job {
   id: string;
   title: string;
-  category:string;
+  category: string;
   companyName: string;
-  location: {
-    city: string;
-    country: string;
-    type: "remote" | "onsite" | "hybrid";
-  };
+  location: string | { city?: string; country?: string; type?: string };
   employmentType: "full-time" | "part-time" | "internship" | "contract";
   experienceLevel: "fresher" | "junior" | "mid" | "senior";
   salary: {
@@ -35,14 +31,20 @@ const JobPage = () => {
   const [location, setLocation] = useState("");
   const [jobType, setJobType] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "jobs"));
-        const jobsList: Job[] = [];
-        querySnapshot.forEach((doc) => {
-          jobsList.push(doc.data() as Job);
-        });
+  const jobsList: Job[] = querySnapshot.docs.map((doc) => {
+  const data = doc.data() as Omit<Job, "id">; // remove id from the spread
+  return {
+    id: doc.id,  // unique ID from Firestore document
+    ...data,
+  };
+});
+
         setJobs(jobsList);
       } catch (err) {
         console.error("Error fetching jobs:", err);
@@ -54,17 +56,22 @@ const JobPage = () => {
     fetchJobs();
   }, []);
 
+  const renderLocation = (loc: string | { city?: string; country?: string }) => {
+    if (!loc) return "Remote";
+    if (typeof loc === "string") return loc;
+    const parts = [];
+    if (loc.city) parts.push(loc.city);
+    if (loc.country) parts.push(loc.country);
+    return parts.join(", ") || "Remote";
+  };
+
   const filteredJobs = jobs.filter((job) => {
     const titleMatch = job.title.toLowerCase().includes(search.toLowerCase());
-    const categoryMatch = category
-      ? job.category.toLowerCase() === category.toLowerCase()
-      : true;
+    const categoryMatch = category ? job.category.toLowerCase() === category.toLowerCase() : true;
     const locationMatch = location
-      ? job.location.city.toLowerCase() === location.toLowerCase()
+      ? renderLocation(job.location).toLowerCase().includes(location.toLowerCase())
       : true;
-    const typeMatch = jobType
-      ? job.employmentType.toLowerCase() === jobType.toLowerCase()
-      : true;
+    const typeMatch = jobType ? job.employmentType.toLowerCase() === jobType.toLowerCase() : true;
 
     return titleMatch && categoryMatch && locationMatch && typeMatch;
   });
@@ -73,7 +80,7 @@ const JobPage = () => {
 
   return (
     <section className="job-listing-page container">
-      {/* PAGE TITLE */}
+      {/* PAGE HEADER */}
       <div className="page-header">
         <h1>Find Your Perfect Job</h1>
         <p>Explore thousands of job opportunities curated for you</p>
@@ -97,14 +104,12 @@ const JobPage = () => {
           <option value="HR">HR</option>
         </select>
 
-        <select value={location} onChange={(e) => setLocation(e.target.value)}>
-          <option value="">Location</option>
-          <option value="Bangalore">Bangalore</option>
-          <option value="Hyderabad">Hyderabad</option>
-          <option value="Mumbai">Mumbai</option>
-          <option value="Delhi">Delhi</option>
-          <option value="Remote">Remote</option>
-        </select>
+        <input
+          type="text"
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
 
         <select value={jobType} onChange={(e) => setJobType(e.target.value)}>
           <option value="">Job Type</option>
@@ -113,18 +118,17 @@ const JobPage = () => {
           <option value="internship">Internship</option>
           <option value="contract">Contract</option>
         </select>
-
-        <button className="filter-btn" onClick={(e) => e.preventDefault()}>
-          Search
-        </button>
       </div>
 
-      {/* JOB LIST GRID */}
+      {/* JOB GRID */}
       <div className="job-list-grid">
         {filteredJobs.length > 0 ? (
           filteredJobs.map((job) => (
-            <div className="job-card" key={job.id}>
-              <Link to={`/jobs/${job.id}`}></Link>
+            <Link
+              to={`/jobs/${job.id}`}
+              key={job.id}
+              className="job-card"
+            >
               <div className="top">
                 <h3>{job.title}</h3>
                 <span
@@ -142,7 +146,7 @@ const JobPage = () => {
                 </span>
               </div>
               <p className="company">
-                {job.companyName} • {job.location.city}
+                {job.companyName} • {renderLocation(job.location)}
               </p>
               <p className="desc">{job.description}</p>
 
@@ -153,16 +157,13 @@ const JobPage = () => {
                     : "Salary Hidden"}
                 </span>
                 <span>{job.experienceLevel}</span>
-                <button className="apply-btn">Apply Now</button>
               </div>
-            </div>
+            </Link>
           ))
         ) : (
           <p>No jobs found.</p>
         )}
       </div>
-
-      
     </section>
   );
 };

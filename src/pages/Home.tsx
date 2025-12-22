@@ -1,10 +1,80 @@
+import { useEffect, useState } from "react"
+import { collection, getDocs, query, limit } from "firebase/firestore"
+import { db } from "../firebase/config"
+import { Link } from "react-router-dom"
 
+/* ================= TYPES ================= */
+
+type Job = {
+  id: string
+  title: string
+  company: string
+  location?: string | { city?: string; country?: string }
+  type?: "Full Time" | "Part Time" | "Remote"
+}
+
+type Category = {
+  id: string
+  name: string
+  iconClass: string
+}
+
+/* ================= COMPONENT ================= */
 
 function Home() {
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+
+      // Fetch featured jobs (limit 5)
+      const jobsSnap = await getDocs(query(collection(db, "jobs")))
+      const jobsData: Job[] = jobsSnap.docs.map(docSnap => {
+        const data = docSnap.data()
+        return {
+          id: docSnap.id,
+          title: data.title,
+          company: data.company || "Unknown",
+          location: data.location,
+          type: data.type || "Full Time",
+        }
+      })
+
+      // Fetch categories
+      const categoriesSnap = await getDocs(collection(db, "categories"))
+      const categoriesData: Category[] = categoriesSnap.docs.map(docSnap => {
+        const data = docSnap.data()
+        return {
+          id: docSnap.id,
+          name: data.name,
+          iconClass: data.iconClass,
+        }
+      })
+
+      setJobs(jobsData)
+      setCategories(categoriesData)
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [])
+
+  const renderLocation = (loc?: string | { city?: string; country?: string }) => {
+    if (!loc) return "Remote"
+    if (typeof loc === "string") return loc
+    const parts = []
+    if (loc.city) parts.push(loc.city)
+    if (loc.country) parts.push(loc.country)
+    return parts.join(", ") || "Remote"
+  }
+
+  if (loading) return <p>Loading home page...</p>
 
   return (
-   <>
-     
+    <>
       {/* HERO */}
       <section className="hero">
         <div className="container hero-content">
@@ -13,7 +83,7 @@ function Home() {
           </h1>
           <p>Search thousands of jobs from top global companies</p>
 
-          <div className="search-box">
+          {/* <div className="search-box">
             <div className="input-group">
               <i className="ri-search-line"></i>
               <input type="text" placeholder="Job title, keywords..." />
@@ -27,7 +97,7 @@ function Home() {
             <button className="btn search-btn">
               <i className="ri-search-2-line"></i> Search
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -36,12 +106,11 @@ function Home() {
         <h2>Popular Job Categories</h2>
 
         <div className="cat-grid">
-          <div className="cat-card"><i className="ri-pencil-ruler-2-line"></i> Design</div>
-          <div className="cat-card"><i className="ri-code-s-slash-fill"></i> Development</div>
-          <div className="cat-card"><i className="ri-megaphone-line"></i> Marketing</div>
-          <div className="cat-card"><i className="ri-shopping-cart-2-line"></i> Sales</div>
-          <div className="cat-card"><i className="ri-user-3-line"></i> HR & Admin</div>
-          {/* <div className="cat-card"><i className="ri-customer-service-2-line"></i> Customer Support</div> */}
+          {categories.map(cat => (
+            <div key={cat.id} className="cat-card">
+              <i className={cat.iconClass}></i> {cat.name}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -50,29 +119,19 @@ function Home() {
         <h2>Featured Jobs</h2>
 
         <div className="job-list">
-          <div className="job-card">
-            <div className="job-top">
-              <h3>Frontend Developer</h3>
-              <span className="tag full">Full Time</span>
+          {jobs.map(job => (
+            <div key={job.id} className="job-card">
+              <div className="job-top">
+                <h3>{job.title}</h3>
+                <span className={`tag ${job.type?.toLowerCase().replace(" ", "-")}`}>
+                  {job.type}
+                </span>
+              </div>
+              <p>
+                <i className="ri-building-line"></i> {job.company} • {renderLocation(job.location)}
+              </p>
             </div>
-            <p><i className="ri-building-line"></i> Google • Bangalore</p>
-          </div>
-
-          <div className="job-card">
-            <div className="job-top">
-              <h3>UI/UX Designer</h3>
-              <span className="tag remote">Remote</span>
-            </div>
-            <p><i className="ri-building-line"></i> Tesla • Remote</p>
-          </div>
-
-          <div className="job-card">
-            <div className="job-top">
-              <h3>Software Engineer</h3>
-              <span className="tag full">Full Time</span>
-            </div>
-            <p><i className="ri-building-line"></i> Microsoft • Hyderabad</p>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -107,13 +166,11 @@ function Home() {
       <section className="cta">
         <div className="container">
           <h2>Ready to Find Your Next Job?</h2>
-          <a href="#" className="cta-btn">Create Free Account</a>
+          <Link to="/signup" className="cta-btn">Create Free Account</Link>
         </div>
       </section>
-
-     
     </>
   )
 }
 
-export default Home;
+export default Home
