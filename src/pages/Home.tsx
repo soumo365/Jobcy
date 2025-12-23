@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { collection, getDocs, query, limit } from "firebase/firestore"
+import { collection, getDocs, query } from "firebase/firestore"
 import { db } from "../firebase/config"
 import { Link } from "react-router-dom"
 

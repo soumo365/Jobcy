@@ -49,7 +49,7 @@ function MyJobs() {
   const [applications, setApplications] =
     useState<ApplicationWithJob[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState("all")
+  const [filter] = useState("all")
 
   useEffect(() => {
     if (!userData?.uid) return

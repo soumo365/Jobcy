@@ -8,7 +8,7 @@ import { uploadToSupabase } from "../../services/FileUploadServices";
 
 function EditEmployerProfile() {
   
-  const {user,userData,setUserData,loading} = useAuth();
+  const {user,userData,setUserData} = useAuth();
   const navigate = useNavigate();
   interface  employerProfileDataType{
       companyName : string;
@@ -47,12 +47,12 @@ const handleBenefitKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) =>{
      e.currentTarget.value = "";
     }
 }
-const removeBenefit = (index: number) => {
-   setEmployerProfileData(prev =>({
-        ...prev,
-        benefits : prev.benefits.filter((_, i) => i !== index)
-     }))
-};
+// const removeBenefit = (index: number) => {
+//    setEmployerProfileData(prev =>({
+//         ...prev,
+//         benefits : prev.benefits.filter((_, i) => i !== index)
+//      }))
+// };
 
 
 const [selectedPicFile, setSelectedPicFile] = useState<File | null>();
