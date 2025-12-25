@@ -35,9 +35,16 @@ function JobDetails() {
     fetchProfilePic()
   }, [job?.postedBy])
 
-  /* ================= UI ================= */
+  /* ================= LOGIC ================= */
 
   const isEmployer = userData?.role === "employer"
+  const isLoggedIn = !!userData
+
+  const applyLink = !isLoggedIn
+    ? "/signup"
+    : `/jobs/${job.id}/apply`
+
+  /* ================= UI ================= */
 
   return (
     <section className="jobDetails">
@@ -67,7 +74,7 @@ function JobDetails() {
           </div>
 
           <Link
-            to={`/jobs/${job.id}/apply`}
+            to={applyLink}
             className={`applyBtn ${isEmployer ? "disabled" : ""}`}
           >
             Apply Now
