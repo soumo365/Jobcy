@@ -72,33 +72,34 @@ function Home() {
       <section className="featured container">
         <h2>Featured Jobs</h2>
 
-        <div className="job-list">
-          {jobs.map(job => (
-            <Link
-              key={job.id}
-              to={`/jobs/${job.id}`}
-              className="job-card-link"
-            >
-              <div className="job-card">
-                <div className="job-top">
-                  <h3>{job.title}</h3>
-                  <span
-                    className={`tag ${job.type
-                      ?.toLowerCase()
-                      .replace(" ", "-")}`}
-                  >
-                    {job.type}
-                  </span>
-                </div>
-
-                <p>
-                  <i className="ri-building-line"></i>
-                  {job.company} • {renderLocation(job.location)}
-                </p>
-              </div>
-            </Link>
-          ))}
+       <div className="job-list">
+  {jobs.slice(0, 4).map(job => (
+    <Link
+      key={job.id}
+      to={`/jobs/${job.id}`}
+      className="job-card-link"
+    >
+      <div className="job-card">
+        <div className="job-top">
+          <h3>{job.title}</h3>
+          <span
+            className={`tag ${job.type
+              ?.toLowerCase()
+              .replace(" ", "-")}`}
+          >
+            {job.type}
+          </span>
         </div>
+
+        <p>
+          <i className="ri-building-line"></i>
+          {job.company} • {renderLocation(job.location)}
+        </p>
+      </div>
+    </Link>
+  ))}
+</div>
+
       </section>
 
       {/* WHY US */}

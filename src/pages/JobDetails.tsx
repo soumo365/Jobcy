@@ -10,15 +10,37 @@ function JobDetails() {
   const { jobs, loading } = useJobs()
   const { userData, loading: authLoading } = useAuth()
 
-  if (loading || authLoading) return <p>Loading job...</p>
-
-  const job = jobs.find(j => j.id === jobId)
-  if (!job) return <p>Job not found</p>
-
-  /* ================= EMPLOYER PROFILE PIC ================= */
-
+  // ✅ ALL HOOKS AT TOP
+  const [job, setJob] = useState<any>(null)
+  const [jobLoading, setJobLoading] = useState(true)
   const [employerProfilePic, setEmployerProfilePic] =
     useState<string | null>(null)
+
+  /* ================= LOAD JOB ================= */
+
+  useEffect(() => {
+    if (!jobId) return
+
+    const existingJob = jobs.find(j => j.id === jobId)
+
+    if (existingJob) {
+      setJob(existingJob)
+      setJobLoading(false)
+      return
+    }
+
+    const fetchJob = async () => {
+      const snap = await getDoc(doc(db, "jobs", jobId))
+      if (snap.exists()) {
+        setJob({ id: snap.id, ...snap.data() })
+      }
+      setJobLoading(false)
+    }
+
+    fetchJob()
+  }, [jobId, jobs])
+
+  /* ================= EMPLOYER PROFILE PIC ================= */
 
   useEffect(() => {
     if (!job?.postedBy) return
@@ -35,6 +57,13 @@ function JobDetails() {
     fetchProfilePic()
   }, [job?.postedBy])
 
+  /* ================= SAFE RETURNS ================= */
+
+  if (loading || authLoading || jobLoading)
+    return <p>Loading job...</p>
+
+  if (!job) return <p>Job not found</p>
+
   /* ================= LOGIC ================= */
 
   const isEmployer = userData?.role === "employer"
@@ -50,7 +79,6 @@ function JobDetails() {
     <section className="jobDetails">
       <div className="container">
 
-        {/* JOB HEADER */}
         <div className="jobHeader">
           <div className="companyInfo">
             <img
@@ -82,8 +110,6 @@ function JobDetails() {
         </div>
 
         <div className="jobLayout">
-
-          {/* LEFT CONTENT */}
           <div className="jobContent">
             <div className="card">
               <h2>Job Description</h2>
@@ -93,14 +119,13 @@ function JobDetails() {
             <div className="card">
               <h2>Required Skills</h2>
               <div className="skills">
-                {job.skillsRequired?.map((skill, i) => (
+                {job.skillsRequired?.map((skill: string, i: number) => (
                   <span key={i}>{skill}</span>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* RIGHT SIDEBAR */}
           <aside className="jobSidebar">
             <div className="sidebarCard">
               <h3>Job Overview</h3>
@@ -115,8 +140,6 @@ function JobDetails() {
                 <li><strong>Experience:</strong> {job.experienceLevel}</li>
                 <li><strong>Location:</strong> {job.location?.city}</li>
                 <li><strong>Job Type:</strong> {job.employmentType}</li>
-                <li><strong>Applicants:</strong> 0</li>
-                <li><strong>Views:</strong> 0</li>
               </ul>
             </div>
 
@@ -125,7 +148,6 @@ function JobDetails() {
               <p>{userData?.profile?.about || "No company info available"}</p>
             </div>
           </aside>
-
         </div>
       </div>
     </section>
