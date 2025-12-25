@@ -56,7 +56,7 @@ function ApplyJob() {
       phone: userData.phone || "",
       location: userData.location || "",
     }))
-  }, [userData])
+  }, [userData])    
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -65,14 +65,14 @@ function ApplyJob() {
   }
 
   // 🔹 Format job location (FIX FOR YOUR ERROR)
-  const formatJobLocation = (location: any) => {
-    if (!location) return ""
-    const { city, country, type } = location
+  // const formatJobLocation = (location: any) => {
+  //   if (!location) return ""
+  //   const { city, country, type } = location
 
-    if (city && country) return `${city}, ${country}`
-    if (type) return type
-    return ""
-  }
+  //   if (city && country) return `${city}, ${country}`
+  //   if (type) return type
+  //   return ""
+  // }
 
   // 🔹 Submit application
 const handleSubmit = async (e: React.FormEvent) => {
@@ -118,7 +118,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       <div className="container apply-grid">
 
         {/* LEFT: JOB INFO */}
-        <div className="job-summary">
+        {/* <div className="job-summary">
           <div className="company-box">
             <img
               src={job.employer?.profilePic || "/default-avatar.png"}
@@ -131,7 +131,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* RIGHT: APPLY FORM */}
         <div className="apply-form">
