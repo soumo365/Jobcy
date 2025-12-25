@@ -16,6 +16,9 @@ type Application = {
   id: string
   applicantUid: string
   jobId: string
+  name?: string
+  fullName?: string
+  candidateName?: string
   status?: "in-review" | "shortlisted" | "rejected"
   createdAt?: any
 }
@@ -23,6 +26,8 @@ type Application = {
 type UserProfile = {
   profilePic?: string
   fullName?: string
+  name?: string
+  displayName?: string
 }
 
 type ApplicantWithProfile = Application & {
@@ -44,7 +49,6 @@ function EmployerJobApplicants() {
     const fetchApplicants = async () => {
       setLoading(true)
 
-      // 1️⃣ Fetch applications for this job
       const q = query(
         collection(db, "applications"),
         where("jobId", "==", jobId)
@@ -52,9 +56,8 @@ function EmployerJobApplicants() {
 
       const snap = await getDocs(q)
 
-      // 2️⃣ Join candidate profile
       const result: ApplicantWithProfile[] = await Promise.all(
-        snap.docs.map(async appDoc => {
+        snap.docs.map(async (appDoc) => {
           const appData = {
             id: appDoc.id,
             ...(appDoc.data() as Omit<Application, "id">),
@@ -70,8 +73,21 @@ function EmployerJobApplicants() {
             const user = userSnap.data()
 
             applicantData = {
-              profilePic: user?.profile?.profilePic || "",
-              fullName: user?.profile?.fullName || "",
+              profilePic:
+                user?.profile?.profilePic ||
+                user?.profilePic ||
+                "/default-avatar.png",
+
+              fullName:
+                user?.profile?.fullName ||
+                user?.fullName ||
+                user?.name ||
+                user?.displayName ||
+                // 🔥 fallback from application
+                appData.name ||
+                appData.fullName ||
+                appData.candidateName ||
+                "Unnamed Candidate",
             }
           }
 
@@ -96,6 +112,10 @@ function EmployerJobApplicants() {
   return (
     <section className="employer-applicants">
       <div className="container">
+        <Link to={`/employer-my-jobs`} className="back-btn">
+          ← Back to all jobs
+        </Link>
+
         <h1>Applicants</h1>
 
         {applicants.length === 0 && (
@@ -103,22 +123,26 @@ function EmployerJobApplicants() {
         )}
 
         <div className="applicant-list">
-          {applicants.map(app => {
+          {applicants.map((app) => {
             const status = app.status || "in-review"
 
             return (
               <div className="applicant-card" key={app.id}>
                 <div className="applicant-left">
                   <img
-                    src={
-                      app.applicant?.profilePic ||
-                      "/default-avatar.png"
-                    }
+                    src={app.applicant?.profilePic}
                     alt="Applicant"
                   />
 
                   <div>
-                    <h3>{app.applicant?.fullName}</h3>
+                    <h3>
+                      {app.applicant?.fullName ||
+                        app.name ||
+                        app.fullName ||
+                        app.candidateName ||
+                        "Unnamed Candidate"}
+                    </h3>
+
                     <p>
                       Applied on{" "}
                       {app.createdAt
@@ -132,19 +156,13 @@ function EmployerJobApplicants() {
                   <span className={`status ${status}`}>
                     {status.replace("-", " ")}
                   </span>
-
-                  {/* Future actions */}
-                  {/* 
-                  <button className="shortlist">Shortlist</button>
-                  <button className="reject">Reject</button>
-                  */}
                 </div>
-                <Link
-  to={`/employer-my-jobs/employer-job-applicants/${jobId}/${app.applicantUid}`}
->
-  View Profile
-</Link>
 
+                <Link
+                  to={`/employer-my-jobs/employer-job-applicants/${jobId}/${app.applicantUid}`}
+                >
+                  View Profile
+                </Link>
               </div>
             )
           })}

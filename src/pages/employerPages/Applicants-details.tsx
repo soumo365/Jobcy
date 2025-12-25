@@ -15,6 +15,8 @@ import { db } from "../../firebase/config"
 type Application = {
   id: string
   name?: string
+  fullName?: string
+  candidateName?: string
   email?: string
   phone?: string
   location?: string
@@ -32,8 +34,7 @@ function ApplicantDetails() {
     jobId: string
   }>()
 
-  const [application, setApplication] =
-    useState<Application | null>(null)
+  const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -57,6 +58,7 @@ function ApplicantDetails() {
           ...(docSnap.data() as Omit<Application, "id">),
         })
       }
+      
 
       setLoading(false)
     }
@@ -88,6 +90,13 @@ function ApplicantDetails() {
 
   const status = application.status || "in-review"
 
+  // ✅ SAFE NAME RESOLUTION
+  const applicantName =
+    application.name ||
+    application.fullName ||
+    application.candidateName ||
+    "Unnamed Candidate"
+
   return (
     <section className="applicant-details">
       <div className="container">
@@ -100,7 +109,7 @@ function ApplicantDetails() {
 
         {/* PROFILE CARD */}
         <div className="profile-card">
-          <h2>{application.name}</h2>
+          <h2>{applicantName}</h2>
 
           <span className={`status ${status}`}>
             {status.replace("-", " ")}
@@ -109,9 +118,9 @@ function ApplicantDetails() {
 
         {/* DETAILS */}
         <div className="details-card">
-          <p><strong>Email:</strong> {application.email}</p>
-          <p><strong>Phone:</strong> {application.phone}</p>
-          <p><strong>Location:</strong> {application.location}</p>
+          <p><strong>Email:</strong> {application.email || "N/A"}</p>
+          <p><strong>Phone:</strong> {application.phone || "N/A"}</p>
+          <p><strong>Location:</strong> {application.location || "N/A"}</p>
 
           {application.coverLetter && (
             <div className="cover-letter">
@@ -133,9 +142,7 @@ function ApplicantDetails() {
 
           <p className="applied-date">
             Applied on{" "}
-            {application.createdAt
-              ?.toDate?.()
-              .toLocaleDateString()}
+            {application.createdAt?.toDate?.().toLocaleDateString()}
           </p>
         </div>
 

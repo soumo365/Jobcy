@@ -112,7 +112,7 @@ function PostJob() {
       updatedAt: Timestamp.now(),
     });
     alert("Job published successfully ✅");
-    navigate("/employer-jobs");
+    navigate("/employer-my-jobs");
   };
 
   return (
@@ -281,9 +281,7 @@ function PostJob() {
 
             {/* ---------------- Actions ---------------- */}
             <div className="actionRow">
-              <button type="button" className="draftBtn">
-                Save as Draft
-              </button>
+              
               <button type="submit" className="postBtn">
                 Publish Job
               </button>

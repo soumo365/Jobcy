@@ -13,8 +13,8 @@ import { db } from "../../firebase/config"
 
 type Job = {
   id: string
-  title: string
-  company: string
+  title?: string
+  company?: string
   location?: {
     city?: string
     country?: string
@@ -39,40 +39,46 @@ function EmployerMyJobs() {
     if (!userData?.uid) return
 
     const fetchEmployerJobs = async () => {
-      setLoading(true)
+      try {
+        setLoading(true)
 
-      // 1️⃣ Fetch employer jobs
-      const jobsQuery = query(
-        collection(db, "jobs"),
-        where("postedBy", "==", userData.uid)
-      )
+        // 1️⃣ Fetch jobs posted by employer
+        const jobsQuery = query(
+          collection(db, "jobs"),
+          where("postedBy", "==", userData.uid)
+        )
 
-      const jobsSnap = await getDocs(jobsQuery)
+        const jobsSnap = await getDocs(jobsQuery)
 
-      // 2️⃣ For each job → count applications
-      const result: JobWithStats[] = await Promise.all(
-        jobsSnap.docs.map(async jobDoc => {
-          const jobData = {
-            id: jobDoc.id,
-            ...(jobDoc.data() as Omit<Job, "id">),
-          }
+        // 2️⃣ Count applicants for each job
+        const result: JobWithStats[] = await Promise.all(
+          jobsSnap.docs.map(async (jobDoc) => {
+            const jobData = jobDoc.data()
 
-          const appsQuery = query(
-            collection(db, "applications"),
-            where("jobId", "==", jobDoc.id)
-          )
+            const appsQuery = query(
+              collection(db, "applications"),
+              where("jobId", "==", jobDoc.id)
+            )
 
-          const appsSnap = await getDocs(appsQuery)
+            const appsSnap = await getDocs(appsQuery)
 
-          return {
-            ...jobData,
-            applicantsCount: appsSnap.size,
-          }
-        })
-      )
+            return {
+              id: jobDoc.id,
+              title: jobData.title || "Untitled Job",
+              company: jobData.company || "Unknown Company",
+              location: jobData.location || {},
+              postedBy: jobData.postedBy,
+              applicantsCount: appsSnap.size,
+            }
+          })
+        )
 
-      setJobs(result)
-      setLoading(false)
+        setJobs(result)
+      } catch (error) {
+        console.error("Error fetching employer jobs:", error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchEmployerJobs()
@@ -92,13 +98,12 @@ function EmployerMyJobs() {
         )}
 
         <div className="job-list">
-          {jobs.map(job => (
+          {jobs.map((job) => (
             <div className="applicants-job-card" key={job.id}>
               <div className="job-left">
                 <h3>{job.title}</h3>
                 <p>
-                  {job.company} •{" "}
-                  {job.location?.city || "Remote"}
+                  {job.company} • {job.location?.city || "Remote"}
                 </p>
               </div>
 
@@ -107,10 +112,11 @@ function EmployerMyJobs() {
                   {job.applicantsCount} Applicants
                 </span>
 
-            <Link to={`/employer-my-jobs/employer-job-applicants/${job.id}`}>
-  View Applications
-</Link>
-
+                <Link
+                  to={`/employer-my-jobs/employer-job-applicants/${job.id}`}
+                >
+                  View Applications
+                </Link>
               </div>
             </div>
           ))}

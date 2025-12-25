@@ -104,12 +104,7 @@ function AboutPage() {
   </section>
 
   {/* CTA */}
-  <section className="join-cta">
-    <div className="container">
-      <h2>Be part of our growing journey</h2>
-      <a href="#" className="cta-btn">Join Us</a>
-    </div>
-  </section>
+
 
 </section>
 

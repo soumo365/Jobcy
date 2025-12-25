@@ -61,8 +61,9 @@ useEffect(() => {
               </div>
             </div>
           </div>
-
-          <Link to={`/jobs/${job.id}/apply`} className="applyBtn">Apply Now</Link>
+         
+          <Link to={`/jobs/${job.id}/apply`} className= {`applyBtn ${userData.role === "employer" 
+            && "disabled" }`} >Apply Now</Link>
         </div>
 
         <div className="jobLayout">
